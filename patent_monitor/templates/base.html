@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}专利法律状态监控{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+           background:#f4f6fa; color:#26303f; }
+    header.top { background:#23304d; color:#fff; display:flex;
+                 align-items:center; padding:0 26px; height:54px; }
+    header.top .brand { font-weight:700; margin-right:34px; }
+    header.top a.nav { color:#c6d2ea; text-decoration:none; margin-right:22px;
+                       font-size:14px; padding:6px 2px; }
+    header.top a.nav.active { color:#fff; border-bottom:2px solid #5b8def; }
+    main { padding:24px 28px; max-width:1280px; margin:0 auto; }
+    h1 { font-size:20px; margin:0 0 16px; }
+    .card { background:#fff; border-radius:10px; padding:20px 22px;
+            box-shadow:0 2px 10px rgba(30,45,80,.06); margin-bottom:20px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th,td { padding:9px 10px; border-bottom:1px solid #eef0f5;
+            text-align:left; white-space:nowrap; }
+    th { background:#f7f9fc; color:#55607a; font-weight:600; }
+    tr:hover td { background:#fafbfe; }
+    .tag { display:inline-block; padding:2px 9px; border-radius:11px;
+           font-size:12px; }
+    .t-due_soon { background:#fff4e0; color:#b46a08; }
+    .t-grace { background:#fdeaea; color:#c9352f; }
+    .t-overdue { background:#f8d7da; color:#842029; font-weight:600; }
+    .t-normal { background:#e6f7ec; color:#1a8a47; }
+    .t-done { background:#e6f7ec; color:#1a8a47; }
+    .t-pending { background:#eef2fb; color:#2f6fed; }
+    .t-failed,.t-banned_wait { background:#fdeaea; color:#c9352f; }
+    .t-in_progress { background:#fff4e0; color:#b46a08; }
+    .filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    select,input[type=text] { padding:8px 10px; border:1px solid #cfd6e4;
+            border-radius:6px; font-size:13px; }
+    button,.btn { padding:8px 16px; background:#2f6fed; color:#fff;
+            border:0; border-radius:6px; cursor:pointer; font-size:13px;
+            text-decoration:none; display:inline-block; }
+    button.secondary,.btn.secondary { background:#eef2fb; color:#2f6fed; }
+    .flash { padding:10px 16px; border-radius:8px; margin-bottom:12px;
+             font-size:13px; }
+    .flash.ok { background:#e6f7ec; color:#1a8a47; }
+    .flash.warn { background:#fff4e0; color:#b46a08; }
+    .flash.error { background:#fdeaea; color:#c9352f; }
+    .muted { color:#8893a8; font-size:12px; }
+    .pager a { margin-right:8px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    label.f { display:block; font-size:13px; margin-bottom:12px; }
+    label.f span { display:block; color:#55607a; margin-bottom:4px; }
+    label.f input { width:100%; }
+    .nowrap { white-space:nowrap; }
+    a { color:#2f6fed; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <span class="brand">专利法律状态监控</span>
+    {% set ep = request.endpoint or '' %}
+    <a class="nav {{ 'active' if ep=='cases_page' or ep=='case_detail' }}"
+       href="{{ url_for('cases_page') }}">案件清单</a>
+    <a class="nav {{ 'active' if ep=='tasks_page' }}"
+       href="{{ url_for('tasks_page') }}">采集任务</a>
+    <a class="nav {{ 'active' if ep=='changes_page' }}"
+       href="{{ url_for('changes_page') }}">状态变化</a>
+    <a class="nav {{ 'active' if ep=='reminders_page' }}"
+       href="{{ url_for('reminders_page') }}">期限提醒</a>
+    <a class="nav {{ 'active' if ep=='settings_page' }}"
+       href="{{ url_for('settings_page') }}">设置</a>
+  </header>
+  <main>
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+    {% endwith %}
+    {% block body %}{% endblock %}
+  </main>
+</body>
+</html>

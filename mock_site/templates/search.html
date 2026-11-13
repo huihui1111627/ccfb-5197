@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>专利检索 - Mock 专利查询系统</title>
+  <style>
+    body { font-family:"PingFang SC", sans-serif; margin:0; background:#f4f6fa; }
+    header { background:#23304d; color:#fff; padding:14px 28px;
+             display:flex; justify-content:space-between; align-items:center; }
+    main { padding:28px; max-width:960px; margin:0 auto; }
+    .bar { display:flex; gap:10px; }
+    input { flex:1; padding:10px 12px; border:1px solid #cfd6e4; border-radius:6px; }
+    button { padding:10px 22px; background:#2f6fed; color:#fff; border:0;
+             border-radius:6px; cursor:pointer; }
+    table { width:100%; border-collapse:collapse; background:#fff; margin-top:20px;
+            border-radius:8px; overflow:hidden; }
+    th,td { padding:10px 12px; border-bottom:1px solid #eef0f5; text-align:left;
+            font-size:13px; }
+    th { background:#f7f9fc; color:#445; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:10px; font-size:12px; }
+    .ok { background:#e6f7ec; color:#1a8a47; }
+    .bad { background:#fdeaea; color:#c9352f; }
+    #msg { margin-top:14px; color:#a33; }
+    a { color:#9fb3d8; text-decoration:none; font-size:13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>专利检索(签名版)</strong>
+    <span>{{ user }} · <a href="/logout">退出</a></span>
+  </header>
+  <main>
+    <div class="bar">
+      <input id="appNo" placeholder="输入完整申请号, 如 2020101234569">
+      <button id="go">查询</button>
+    </div>
+    <div id="msg"></div>
+    <table id="result" style="display:none">
+      <tr><th>字段</th><th>内容</th></tr>
+      <tbody></tbody>
+    </table>
+  </main>
+  <script src="/static/sign.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    async function query() {
+      const appNo = $("appNo").value.trim();
+      $("msg").textContent = "";
+      if (!appNo) { $("msg").textContent = "请输入申请号"; return; }
+      const ts = String(Math.floor(Date.now() / 1000));
+      const sign = sign(ts, appNo);          // 页面 JS 算签名
+      let resp;
+      try {
+        resp = await fetch(`/api/patent?appNo=${encodeURIComponent(appNo)}&ts=${ts}&sign=${sign}`);
+      } catch (e) { $("msg").textContent = "网络错误: " + e; return; }
+      const body = await resp.json();
+      if (body.code !== 0) {
+        $("result").style.display = "none";
+        $("msg").textContent = `查询失败(${resp.status}): ${body.message}` +
+          (body.retryAfter ? `, 请 ${body.retryAfter}s 后重试` : "");
+        return;
+      }
+      const d = body.data;
+      const rows = [
+        ["申请号", d.appNo], ["名称", d.title], ["类型", d.patentType],
+        ["申请日", d.appDate], ["授权日", d.grantDate || "—"],
+        ["法律状态", d.legalStatus], ["状态日期", d.statusDate],
+        ["当前专利权人", d.assignee], ["申请人", d.applicant],
+        ["年费记录", d.feeRecords.map(f =>
+          `第${f.year}年 ${f.dueDate} ¥${f.amount} ` +
+          (f.paid ? `已缴(${f.paidDate})` : "未缴")).join("<br>")],
+      ];
+      $("result").querySelector("tbody").innerHTML = rows.map(([k, v]) =>
+        `<tr><th>${k}</th><td>${v}</td></tr>`).join("");
+      $("result").style.display = "table";
+    }
+    $("go").onclick = query;
+    $("appNo").addEventListener("keydown", e => e.key === "Enter" && query());
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>设置</h1>
+<form method="post" class="card" style="max-width:760px">
+  <h2 style="font-size:15px;margin:0 0 12px">查询站点</h2>
+  <div class="grid2">
+    <label class="f"><span>站点地址</span>
+      <input name="base_url" value="{{ s.base_url }}"></label>
+    <label class="f"><span>用户名</span>
+      <input name="username" value="{{ s.username }}"></label>
+    <label class="f"><span>密码</span>
+      <input name="password" value="{{ s.password }}"></label>
+    <label class="f"><span>无头浏览器</span>
+      <input type="checkbox" name="headless" {{ 'checked' if s.headless }}
+             style="width:auto"></label>
+  </div>
+
+  <h2 style="font-size:15px;margin:18px 0 12px">采集节奏</h2>
+  <div class="grid2">
+    <label class="f"><span>每批任务数</span>
+      <input type="number" name="batch_size" value="{{ s.batch_size }}"></label>
+    <label class="f"><span>请求间隔(秒)</span>
+      <input type="number" step="0.5" name="request_interval"
+             value="{{ s.request_interval }}"></label>
+    <label class="f"><span>批次暂停(秒)</span>
+      <input type="number" step="0.5" name="batch_pause"
+             value="{{ s.batch_pause }}"></label>
+    <label class="f"><span>失败最大重试</span>
+      <input type="number" name="max_retries" value="{{ s.max_retries }}"></label>
+    <label class="f"><span>自动轮询间隔(分钟)</span>
+      <input type="number" name="poll_interval_minutes"
+             value="{{ s.poll_interval_minutes }}"></label>
+  </div>
+
+  <h2 style="font-size:15px;margin:18px 0 12px">年费提醒</h2>
+  <div class="grid2">
+    <label class="f"><span>提前提醒天数(应缴日前 N 天)</span>
+      <input type="number" name="remind_days" value="{{ s.remind_days }}"></label>
+    <label class="f"><span>宽限期天数(滞纳期)</span>
+      <input type="number" name="grace_days" value="{{ s.grace_days }}"></label>
+    <label class="f"><span>应缴日提前量(天)</span>
+      <input type="number" name="renew_advance_days"
+             value="{{ s.renew_advance_days }}"></label>
+  </div>
+
+  <button type="submit">保存设置</button>
+</form>
+{% endblock %}

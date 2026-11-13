@@ -16,3 +16,13 @@ node_modules/
 __pycache__/
 .venv/
 venv/
+.pytest_cache/
+
+# 运行时产物(数据库/日志/浏览器会话/导出文件), 保留演示 CSV
+data/*.db
+data/*.db-*
+data/*.log
+data/*.json
+data/*.xlsx
+data/cookies.txt
+data/target.txt

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>采集任务
+  {% if running %}<span class="tag t-in_progress">采集中…</span>{% endif %}
+</h1>
+
+<div class="card">
+  <form method="post" action="{{ url_for('tasks_run') }}"
+        style="display:flex;gap:10px;align-items:center">
+    <button type="submit" {{ 'disabled' if running }}>立即触发一轮采集</button>
+    <button class="secondary" formaction="{{ url_for('tasks_reset') }}"
+            type="submit">重置失败/封禁任务</button>
+    <span class="muted">调度器按设置自动分批限速; 被封 IP 后任务进入"封禁等待",
+      到期自动恢复; 进程中断后从上次游标继续</span>
+  </form>
+</div>
+
+{% if invalid_cases %}
+<div class="card">
+  <h2 style="font-size:15px;margin:0 0 10px">校验未通过、不发请求的申请号 ({{ invalid_cases|length }})</h2>
+  <table>
+    <tr><th>原始输入</th><th>登记键</th><th>原因</th></tr>
+    {% for c in invalid_cases %}
+    <tr><td>{{ c.raw_input }}</td><td>{{ c.app_no }}</td>
+        <td class="nowrap" style="color:#c9352f">{{ c.check_reason }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+
+<div class="card">
+  <form class="filters" method="get">
+    <select name="status" onchange="this.form.submit()">
+      <option value="">全部状态</option>
+      {% for k, v in labels.items() %}
+        <option value="{{ k }}" {{ 'selected' if filter_status==k }}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <table>
+    <tr><th>申请号</th><th>客户</th><th>状态</th><th>尝试次数</th>
+        <th>下次可执行</th><th>最近错误</th><th>最近执行</th></tr>
+    {% for t in tasks %}
+    <tr>
+      <td>{{ t.app_no }}{% if not t.valid %} <span class="tag t-failed">无效</span>{% endif %}</td>
+      <td>{{ t.customer }}</td>
+      <td><span class="tag t-{{ t.status }}">{{ labels.get(t.status, t.status) }}</span></td>
+      <td>{{ t.attempts }}</td>
+      <td>{{ t.next_run_at or '—' }}</td>
+      <td class="muted" style="white-space:normal;max-width:340px">{{ t.last_error or '—' }}</td>
+      <td class="muted">{{ t.last_run_at or '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted">暂无任务,请先导入有效案件</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="font-size:15px;margin:0 0 10px">最近轮询日志</h2>
+  <table>
+    <tr><th>开始</th><th>结束</th><th>总数</th><th>成功</th>
+        <th>失败</th><th>封禁</th><th>断点游标</th><th>备注</th></tr>
+    {% for l in logs %}
+    <tr>
+      <td class="nowrap">{{ l.started_at }}</td>
+      <td class="nowrap">{{ l.finished_at or '进行中' }}</td>
+      <td>{{ l.total }}</td><td>{{ l.success }}</td>
+      <td>{{ l.failed }}</td><td>{{ l.banned }}</td>
+      <td>{{ l.cursor_pos }}</td><td class="muted">{{ l.note }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>案件详情 · {{ case.app_no }}</h1>
+<div class="card">
+  <table>
+    <tr><th>客户</th><td>{{ case.customer }}</td>
+        <th>备注</th><td>{{ case.case_alias }}</td></tr>
+    <tr><th>原始输入</th><td>{{ case.raw_input }}</td>
+        <th>校验</th>
+        <td>{% if case.check_valid %}<span class="tag t-done">通过</span>
+            {% else %}<span class="tag t-failed">{{ case.check_reason }}</span>
+            {% endif %}</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="font-size:15px;margin:0 0 10px">年费提醒</h2>
+  <table>
+    <tr><th>年度</th><th>应缴日</th><th>宽限期截止</th><th>金额</th><th>级别</th></tr>
+    {% for r in reminders %}
+    <tr><td>第{{ r.fee_year }}年</td><td>{{ r.due_date }}</td>
+        <td>{{ r.grace_end }}</td><td>{{ r.amount }}</td>
+        <td><span class="tag t-{{ r.level }}">{{ levels.get(r.level) }}</span></td></tr>
+    {% else %}<tr><td colspan="5" class="muted">暂无</td></tr>{% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="font-size:15px;margin:0 0 10px">变化历史</h2>
+  <table>
+    <tr><th>时间</th><th>字段</th><th>原值</th><th>新值</th><th>说明</th></tr>
+    {% for ch in changes %}
+    <tr><td class="nowrap">{{ ch.changed_at }}</td><td>{{ ch.field }}</td>
+        <td class="muted">{{ ch.old_value or '—' }}</td>
+        <td>{{ ch.new_value or '—' }}</td><td>{{ ch.detail }}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">暂无</td></tr>{% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h2 style="font-size:15px;margin:0 0 10px">采集快照</h2>
+  {% for s in snapshots %}
+  <details style="margin-bottom:8px">
+    <summary style="cursor:pointer">
+      {{ s.captured_at }} · {{ s.legal_status }} · 专利权人:{{ s.assignee }}
+    </summary>
+    <pre style="font-size:12px;overflow:auto;background:#f7f9fc;padding:12px;
+                border-radius:6px">{{ s.fee_json }}</pre>
+  </details>
+  {% else %}<p class="muted">暂无快照</p>{% endfor %}
+</div>
+<p><a class="btn secondary" href="{{ url_for('cases_page') }}">返回清单</a></p>
+{% endblock %}

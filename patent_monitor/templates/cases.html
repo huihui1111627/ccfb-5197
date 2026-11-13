@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>案件清单 <span class="muted">共 {{ total }} 件</span></h1>
+
+<div class="card">
+  <form class="filters" method="get">
+    <select name="customer">
+      <option value="">全部客户</option>
+      {% for c in customers %}
+        <option value="{{ c }}" {{ 'selected' if filters.customer==c }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+    <select name="status">
+      <option value="">全部法律状态</option>
+      {% for st in statuses %}
+        <option value="{{ st }}" {{ 'selected' if filters.status==st }}>{{ st }}</option>
+      {% endfor %}
+    </select>
+    <select name="due_level">
+      <option value="">全部提醒级别</option>
+      {% for k, v in levels.items() %}
+        <option value="{{ k }}" {{ 'selected' if filters.due_level==k }}>{{ v }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" value="{{ filters.q }}" placeholder="申请号 / 备注关键词">
+    <button type="submit">筛选</button>
+    <a class="btn secondary"
+       href="{{ url_for('cases_export', **filters) }}">导出 Excel</a>
+  </form>
+
+  <form method="post" action="{{ url_for('cases_import') }}"
+        enctype="multipart/form-data" class="filters">
+    <input type="file" name="file" accept=".csv,.txt,.xlsx" required>
+    <button type="submit">导入案件清单</button>
+    <span class="muted">支持 CSV/XLSX,表头含 申请号、客户、备注;
+      校验位不通过的申请号不会发请求,直接在采集任务页标出</span>
+  </form>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>申请号</th><th>客户</th><th>备注</th><th>校验</th>
+        <th>法律状态</th><th>提醒</th><th>应缴日</th><th>最近采集</th><th></th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.app_no }}</td>
+      <td>{{ r.customer }}</td>
+      <td>{{ r.case_alias }}</td>
+      <td>
+        {% if r.check_valid %}<span class="tag t-done">通过</span>
+        {% else %}<span class="tag t-failed" title="{{ r.check_reason }}">不通过</span>{% endif %}
+      </td>
+      <td>{{ r.legal_status or '—' }}</td>
+      <td>{% if r.due_level %}
+        <span class="tag t-{{ r.due_level }}">{{ levels.get(r.due_level) }}</span>
+      {% else %}—{% endif %}</td>
+      <td>{{ r.due_date or '—' }}{% if r.fee_year %} (第{{ r.fee_year }}年){% endif %}</td>
+      <td class="muted">{{ r.last_poll or '—' }}</td>
+      <td><a href="{{ url_for('case_detail', case_id=r.id) }}">详情</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="muted">暂无数据,请先导入案件清单</td></tr>
+    {% endfor %}
+  </table>
+
+  {% set base = url_for('cases_page', **filters) %}
+  {% if total > per_page %}
+  <div class="pager" style="margin-top:14px">
+    {% if page > 1 %}
+      <a class="btn secondary" href="{{ base }}{{ '&' if '?' in base else '?' }}page={{ page-1 }}">上一页</a>
+    {% endif %}
+    <span class="muted">第 {{ page }} / {{ ((total-1)//per_page)+1 }} 页</span>
+    {% if page*per_page < total %}
+      <a class="btn secondary" href="{{ base }}{{ '&' if '?' in base else '?' }}page={{ page+1 }}">下一页</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

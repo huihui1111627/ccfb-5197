@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>期限提醒</h1>
+<div class="card">
+  <form class="filters" method="get">
+    <select name="level" onchange="this.form.submit()">
+      <option value="">全部级别</option>
+      {% for k, v in labels.items() %}
+        <option value="{{ k }}" {{ 'selected' if filter_level==k }}>{{ v }}</option>
+      {% endfor %}
+    </select>
+    <span class="muted">应缴日 = 申请日对应日; 宽限期 = 应缴日 + {{ s_grace if s_grace else 180 }} 天</span>
+  </form>
+  <table>
+    <tr><th>申请号</th><th>客户/备注</th><th>年费年度</th><th>金额(元)</th>
+        <th>应缴日</th><th>宽限期截止</th><th>级别</th></tr>
+    {% for r in reminders %}
+    <tr>
+      <td><a href="{{ url_for('case_detail', case_id=r.case_id) }}">{{ r.app_no }}</a></td>
+      <td>{{ r.customer }} / {{ r.case_alias }}</td>
+      <td>第 {{ r.fee_year }} 年</td>
+      <td>{{ r.amount }}</td>
+      <td class="nowrap">{{ r.due_date }}</td>
+      <td class="nowrap">{{ r.grace_end }}</td>
+      <td><span class="tag t-{{ r.level }}">{{ labels.get(r.level) }}</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" class="muted">暂无待提醒年费</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

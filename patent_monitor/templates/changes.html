@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>状态变化</h1>
+<div class="card">
+  <table>
+    <tr><th>时间</th><th>申请号</th><th>客户</th><th>变化项</th>
+        <th>原值</th><th>新值</th></tr>
+    {% for ch in changes %}
+    <tr>
+      <td class="nowrap">{{ ch.changed_at }}</td>
+      <td><a href="{{ url_for('case_detail', case_id=ch.case_id) }}">{{ ch.app_no }}</a></td>
+      <td>{{ ch.customer }}</td>
+      <td>{{ ch.detail }}</td>
+      <td class="muted" style="white-space:normal;max-width:280px">{{ ch.old_value or '—' }}</td>
+      <td style="white-space:normal;max-width:280px">{{ ch.new_value or '—' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted">暂无变化记录(首次采集会产生建档记录)</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

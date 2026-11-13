@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>登录 - Mock 专利查询系统</title>
+  <style>
+    body { font-family: "PingFang SC", sans-serif; background:#f4f6fa;
+           display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+    .card { background:#fff; padding:32px 40px; border-radius:10px;
+            box-shadow:0 4px 18px rgba(0,0,0,.08); width:320px; }
+    h2 { margin:0 0 20px; color:#23304d; }
+    input { width:100%; padding:9px 10px; margin:8px 0; border:1px solid #cfd6e4;
+            border-radius:6px; box-sizing:border-box; }
+    button { width:100%; padding:10px; margin-top:12px; background:#2f6fed;
+             color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:15px; }
+    .err { color:#d33; font-size:13px; margin-top:8px; }
+    .hint { color:#889; font-size:12px; margin-top:14px; }
+  </style>
+</head>
+<body>
+  <form class="card" method="post">
+    <h2>Mock 专利查询系统</h2>
+    <input name="username" placeholder="用户名" autocomplete="username">
+    <input name="password" type="password" placeholder="密码" autocomplete="current-password">
+    <button type="submit">登 录</button>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+    <div class="hint">演示账号: agent / agent123</div>
+  </form>
+</body>
+</html>
